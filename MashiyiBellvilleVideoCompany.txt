@@ -1,0 +1,178 @@
+-- Create a database for the Bellville Video Company where students can hire movies from.
+CREATE DATABASE MashiyiBellvilleVideoCompany;
+
+-- Use the created database
+USE MashiyiBellvilleVideoCompany;
+
+-- Create a table for videos
+CREATE TABLE Videos (
+    VideoID INT AUTO_INCREMENT PRIMARY KEY,
+    Title VARCHAR(255),
+    Director VARCHAR(255),
+    Genre VARCHAR(255),
+    ReleaseYear INT,
+    CopiesAvailable INT
+);
+
+-- Create a table for clients
+CREATE TABLE Clients (
+    ClientID INT AUTO_INCREMENT PRIMARY KEY,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    Phone VARCHAR(15),
+    Address VARCHAR(255),
+    Email VARCHAR(255)
+);
+
+-- Create a table for video rentals
+CREATE TABLE Rentals (
+    RentalID INT AUTO_INCREMENT PRIMARY KEY,
+    ClientID INT,
+    VideoID INT,
+    RentalDate DATE,
+    DueDate DATE,
+    ReturnDate DATE,
+    PenaltyAmount DECIMAL(8, 2),
+    FOREIGN KEY (ClientID) REFERENCES Clients(ClientID),
+    FOREIGN KEY (VideoID) REFERENCES Videos(VideoID)
+);
+
+-- Create a table for video managers
+CREATE TABLE Managers (
+    ManagerID INT AUTO_INCREMENT PRIMARY KEY,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    Email VARCHAR(255),
+    Password VARCHAR(255)
+);
+
+-- Create a table for video clerks
+CREATE TABLE Clerks (
+    ClerkID INT AUTO_INCREMENT PRIMARY KEY,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    Email VARCHAR(255),
+    Password VARCHAR(255)
+);
+
+-- Create a table to track rented videos per client
+CREATE TABLE ClientRentals (
+    ClientID INT,
+    RentalID INT,
+    PRIMARY KEY (ClientID, RentalID),
+    FOREIGN KEY (ClientID) REFERENCES Clients(ClientID),
+    FOREIGN KEY (RentalID) REFERENCES Rentals(RentalID)
+);
+
+-- Create a table to track videos managed by managers
+CREATE TABLE ManagerVideos (
+    ManagerID INT,
+    VideoID INT,
+    PRIMARY KEY (ManagerID, VideoID),
+    FOREIGN KEY (ManagerID) REFERENCES Managers(ManagerID),
+    FOREIGN KEY (VideoID) REFERENCES Videos(VideoID)
+);
+
+-- Create a table to track videos managed by clerks
+CREATE TABLE ClerkVideos (
+    ClerkID INT,
+    VideoID INT,
+    PRIMARY KEY (ClerkID, VideoID),
+    FOREIGN KEY (ClerkID) REFERENCES Clerks(ClerkID),
+    FOREIGN KEY (VideoID) REFERENCES Videos(VideoID)
+);
+
+-- Create a table to store penalties
+CREATE TABLE Penalties (
+    PenaltyID INT AUTO_INCREMENT PRIMARY KEY,
+    ClientID INT,
+    RentalID INT,
+    PenaltyAmount DECIMAL(8, 2),
+    FOREIGN KEY (ClientID) REFERENCES Clients(ClientID),
+    FOREIGN KEY (RentalID) REFERENCES Rentals(RentalID)
+);
+
+-- Insert sample data into the Videos table
+INSERT INTO Videos (Title, Director, Genre, ReleaseYear, CopiesAvailable)
+VALUES
+    ('Rush Hour 2', 'Jackie Chan', 'Action', 2020, 5),
+    ('The Mask', 'Jim Carrey', 'Comedy', 2019, 3),
+    ('Endgame', 'Russo Brothers', 'Thriller', 2021, 7);
+
+-- Insert sample data into the Clients table
+INSERT INTO Clients (FirstName, LastName, Phone, Address, Email)
+VALUES
+    ('Emmanuel', 'Mukadi', '0781534896', '123 Main St', 'mukadim@gmail.com'),
+    ('Cliff', 'Makhetha', '08346251387', '456 Elm St', 'cliffm@gmail.com'),
+    ('Ria', 'Tonga', '0796485239', '789 Oak St', 'riat@gmail.com');
+
+-- Insert sample data into the Managers table
+INSERT INTO Managers (FirstName, LastName, Email, Password)
+VALUES
+    ('Vutlari', 'Mashiymbi', 'vutlarim@gmail.com', 'manager1password');
+
+-- Insert sample data into the Clerks table
+INSERT INTO Clerks (FirstName, LastName, Email, Password)
+VALUES
+    ('Russell', 'Banze', 'russellb@gmail.com', 'clerk1password');
+
+-- Insert sample data into the Rentals table
+-- Make sure to update ClientID and VideoID with existing IDs from Clients and Videos tables
+-- DueDate should be a week from the RentalDate
+-- ReturnDate and PenaltyAmount can be NULL initially
+INSERT INTO Rentals (ClientID, VideoID, RentalDate, DueDate, ReturnDate, PenaltyAmount)
+VALUES
+    (1, 1, '2023-10-01', '2023-10-08', NULL, NULL),
+    (2, 2, '2023-10-02', '2023-10-09', NULL, NULL),
+    (3, 3, '2023-10-03', '2023-10-10', NULL, NULL);
+
+-- Insert sample data into ClientRentals, ManagerVideos, and ClerkVideos tables
+-- This data connects clients with their rented videos and managers/clerks with the videos they manage
+-- Adjust ClientID and RentalID for ClientRentals, and ManagerID and VideoID for ManagerVideos and ClerkVideos tables
+INSERT INTO ClientRentals (ClientID, RentalID)
+VALUES
+    (1, 1),
+    (2, 2),
+    (3, 3);
+
+INSERT INTO ManagerVideos (ManagerID, VideoID)
+VALUES
+    (1, 1),
+    (1, 2),
+    (2, 3);
+
+INSERT INTO ClerkVideos (ClerkID, VideoID)
+VALUES
+    (1, 1),
+    (2, 2),
+    (2, 3);
+
+DESC videos;
+DESC Clients;
+DESC Rentals;
+DESC Managers;
+DESC Clerks; 
+DESC ClientRentals;
+DESC ManagerVideos;
+DESC ClerkVideos;
+DESC Penalties;
+ 
+SELECT*FROM videos;
+SELECT*FROM Clients;
+SELECT*FROM Rentals;
+SELECT*FROM Managers;
+SELECT*FROM Clerks; 
+SELECT*FROM ClientRentals;
+SELECT*FROM ManagerVideos;
+SELECT*FROM ClerkVideos;
+SELECT*FROM Penalties;
+
+-- Extra requirements
+-- count the number of all the shop’s clients.
+SELECT COUNT(*) AS TotalClients
+FROM Clients;
+
+-- count the number of all the shop’s clients whop exceeded their loan time.
+SELECT COUNT(*) AS OverdueClients
+FROM Rentals
+WHERE DueDate < CURDATE() AND ReturnDate IS NULL;
